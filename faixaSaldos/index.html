@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promoção</title>
+    <style>
+        * {
+            font-family: "Outfit", sans-serif;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .promo-banner {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background-color: #d32f2f;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .promo-item {
+            background-color: #d32f2f;
+            padding: 20px;
+            font-size: 24px;
+            border: 1px solid white;
+        }
+
+        .sale-banner {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background-color: #d32f2f;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            width: 100%;
+            max-width: 1357px;
+            margin: 0 auto;
+            margin-top: 10px;
+        }
+
+        .sale-text, .discount-text, .timer, .cta {
+            padding: 2px;
+            font-size: 20px;
+            font-weight: 100;
+        }
+
+        .time {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .label {
+            display: block;
+            font-size: 10px;
+            margin-top: 3px;
+        }
+
+        .cta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cta button {
+            padding: 7px 20px;
+            background-color: white;
+            color: #d32f2f;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+
+        .countdown-item {
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sale-banner {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="promo-banner">
+        <div class="promo-item">até <br> 40% <br> OFF</div>
+        <div class="promo-item">até <br> 40% <br> OFF</div>
+        <div class="promo-item">até <br> 50% <br> OFF</div>
+        <div class="promo-item">até <br> 50% <br> OFF</div>
+    </div>
+<br><br>
+    <div class="promo-banner">
+        <div class="promo-item">até <br> 40% <br> OFF</div>
+        <div class="promo-item">até <br> 40% <br> OFF</div>
+        <div class="promo-item">até <br> 50% <br> OFF</div>
+        <div class="promo-item">até <br> 50% <br> OFF</div>
+    </div>
+
+    <script>
+        // Injetar o bloco sale-banner depois do promo-banner
+        document.querySelector('.promo-banner').insertAdjacentHTML('afterend', `
+            <div class="sale-banner">
+                <div class="sale-text">
+                    <img src="saldos.png" width="200" alt="Saldos" />
+                </div>
+                <div class="discount-text">
+                    <img src="50off.png"  width="180" alt="Saldos" />
+                </div>
+                <div class="timer">
+                    TERMINA EM <br>
+                    <div id="countdown">
+                        <div class="countdown-item">
+                            <span id="days" class="time"></span><br>
+                            <span class="label">DIAS</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="hours" class="time"></span><br>
+                            <span class="label">HORAS</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="minutes" class="time"></span><br>
+                            <span class="label">MINUTOS</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="seconds" class="time"></span><br>
+                            <span class="label">SEGUNDOS</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cta">
+                    <img alt="" id="svg_cta" src="https://img.camicado.com.br/banner/01-home/home_botao_confira.svg" width="100">
+                </div>
+            </div>
+        `);
+
+        // Data final
+        var countDownDate = new Date("Aug 30, 2024 23:59:59").getTime();
+
+        // Atualiza o contador a cada segundo
+        var x = setInterval(function() {
+
+            // Obtém a data e hora atual
+            var now = new Date().getTime();
+
+            // Calcula a diferença entre agora e a data final
+            var distance = countDownDate - now;
+
+            // Calcula o tempo em dias, horas, minutos e segundos
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Adiciona zero à esquerda se o número for menor que 10
+            days = days < 10 ? "0" + days : days;
+            hours = hours < 10 ? "0" + hours : hours;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            // Exibe o resultado nos elementos correspondentes
+            document.getElementById("days").innerHTML = days;
+            document.getElementById("hours").innerHTML = hours;
+            document.getElementById("minutes").innerHTML = minutes;
+            document.getElementById("seconds").innerHTML = seconds;
+
+            // Se o contador terminar, mostra uma mensagem
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("countdown").innerHTML = "EXPIRED";
+            }
+        }, 1000);
+    </script>
+
+</body>
+</html>

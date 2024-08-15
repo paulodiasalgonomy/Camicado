@@ -1,105 +1,74 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consumo de API</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-
-        #content {
-            width: 90%;
-            max-width: 600px;
-            background: #fff;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow-y: auto;
-        }
-
-        .item {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #e9e9e9;
-            border-radius: 5px;
-            white-space: pre-wrap;
-        }
-    </style>
+    <title>Exemplo Camicado</title>
 </head>
 <body>
     <div id="content"></div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const apiKey = '077c13937e7836b7';
-            const apiClientKey = 'dd43f9c610d18c75';
-            const sessionId = 'algtestsession503899521929';
-            const userId = 'algtestuser238126312960';
-            const categoryId = 'cCozinha';
-            const placements = 'category_page.app_layout';
-            
-            const apiUrl = `https://recs.richrelevance.com/rrserver/api/personalize?apiKey=${apiKey}&apiClientKey=${apiClientKey}&sessionId=${sessionId}&userId=${userId}&placements=${placements}&excludeHtml=true&categoryId=${categoryId}`;
-            
-            function fetchApi(url) {
-                console.log(`Fetching API: ${url}`);
-                return fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Data received:', data);
-                        processApiData(data);
-                    })
-                    .catch(error => console.error('Erro:', error));
-            }
+        const apiKey = '077c13937e7836b7';
+        const apiClientKey = 'dd43f9c610d18c75';
+        const sessionId = 'algtestsession503899521929';
+        const userId = 'algtestuser238126312960';
+        const categoryId = 'cCozinha';
+        const page_type = "category_page.";
+        const placements = page_type + 'app_layout';
 
-            function processApiData(data) {
-                if (data.placements && data.placements.length > 0) {
-                    data.placements.forEach(placement => {
-                        if (placement.creatives && placement.creatives.length > 0) {
-                            placement.creatives.forEach(creative => {
-                                if (creative.APP_PLACEMENTS) {
-                                    if (Array.isArray(creative.APP_PLACEMENTS)) {
-                                        creative.APP_PLACEMENTS.forEach(appPlacement => {
-                                            handleAppPlacement(appPlacement);
-                                        });
-                                    } else {
-                                        handleAppPlacement(creative.APP_PLACEMENTS);
-                                    }
-                                }
-                            });
-                        }
-                    });
+        const apiUrl = `https://recs.richrelevance.com/rrserver/api/personalize?apiKey=${apiKey}&apiClientKey=${apiClientKey}&sessionId=${sessionId}&userId=${userId}&placements=${placements}&excludeHtml=true&categoryId=${categoryId}`;
+
+        var finalJson = [];
+
+        async function fetchData() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                const placementsArray = data.placements || [];
+                const creativesArray = placementsArray[0]?.creatives || [];
+                const appPlacementsString = creativesArray[0]?.APP_PLACEMENTS;
+                console.log(appPlacementsString);
+
+                if (!appPlacementsString) {
+                    console.error('APP_PLACEMENTS not found');
+                    return;
                 }
-            }
 
-            function handleAppPlacement(appPlacement) {
-                console.log('Handling app placement:', appPlacement);
-                if (appPlacement.API === 'personalize') {
-                    const newPlacementUrl = `https://recs.richrelevance.com/rrserver/api/personalize?apiKey=${apiKey}&apiClientKey=${apiClientKey}&sessionId=${sessionId}&userId=${userId}&placements=${appPlacement.PLACEMENTS}&excludeHtml=true&categoryId=${categoryId}`;
-                    console.log(`New API call for placement: ${appPlacement.PLACEMENTS}`);
-                    fetchApi(newPlacementUrl);
-                } else {
-                    displayData(appPlacement);
+                const appPlacements = JSON.parse(appPlacementsString);
+                const appPlacementsArray = Object.entries(appPlacements);
+
+                for (const [key, placement] of appPlacementsArray) {
+                    console.log(placement);
+
+                    const api = placement.API;
+                    const layout = placement.LAYOUT;
+                    const placements = placement.PLACEMENTS.split('|').map(p => `${page_type}${p}`).join('|');
+
+                    let newApiUrl = '';
+                    if (api === "recsForPlacements") {
+                        newApiUrl = `https://recs.richrelevance.com/rrserver/api/rrPlatform/recsForPlacements?apiKey=${apiKey}&apiClientKey=ccdb3c0c8edf136f&sessionId=${sessionId}&userId=${userId}&placements=${placements}&excludeHtml=true&categoryId=${categoryId}`;
+                    } else {
+                        newApiUrl = `https://recs.richrelevance.com/rrserver/api/personalize?apiKey=${apiKey}&apiClientKey=ccdb3c0c8edf136f&sessionId=${sessionId}&userId=${userId}&placements=${placements}&excludeHtml=true&categoryId=${categoryId}`;
+                    }
+                    console.log(newApiUrl);
+
+                    try {
+                        const newResponse = await fetch(newApiUrl);
+                        const newData = await newResponse.json();
+                        console.log('API response:', newData);
+                        finalJson.push(newData);
+                        console.log('\n\n\n\n\n');
+
+                    } catch (newError) {
+                        console.error('Error fetching new API data:', newError);
+                    }
                 }
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
+        }
 
-            function displayData(data) {
-                const content = document.getElementById('content');
-                const item = document.createElement('div');
-                item.className = 'item';
-                item.textContent = JSON.stringify(data, null, 2);
-                content.appendChild(item);
-            }
-
-            fetchApi(apiUrl);
-        });
+        fetchData();
     </script>
 </body>
 </html>
